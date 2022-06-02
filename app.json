@@ -2,13 +2,13 @@
   "expo": {
     "name": "appJuegos",
     "slug": "appJuegos",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#4F56FF"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -17,13 +17,16 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.app.juegos50",
+      "buildNumber": "1.0.2"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },"package": "com.app.juegos5",
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"
