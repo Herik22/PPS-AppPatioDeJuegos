@@ -38,20 +38,13 @@ const LoadingScreen = ({ message }) => {
     </ImageBackground>
   );
 };
-const Colors = {
-  colorLetraGris: "#86939E",
-  colorfondoCB: "transparent",
-  violet: "#5D287E",
-  azulPt: "#2E3880",
-};
+
 const styles = StyleSheet.create({
   imagef: {
     flex: 1,
     justifyContent: "center",
-    width: Dimensions.get("window").width * 2,
-    height: Dimensions.get("window").height * 1.1,
-    alignSelf: "center",
-    marginTop: -60,
+    width: "100%",
+    height: "100%",
   },
 });
 export default LoadingScreen;

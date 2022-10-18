@@ -12,16 +12,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { Input } from "@rneui/base";
 import { Formik } from "formik";
 import * as yup from "yup";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLogin } from "../context/LoginProvider";
 import ModalLogin from "../components/login/modalLogin";
 import ColorsPPS from "../utils/ColorsPPS";
 import LoadingScreen from "../utils/loadingScreen";
+import Sizes_ from "../utils/Sizes";
+import { authentication } from "../firebase-config";
 
 const Login = (props) => {
-  const { setisFinishSplash, setIsLogIn } = useLogin();
+  const { setisFinishSplash, setIsLogIn, setEmail_ } = useLogin();
   const { navigation } = props;
-  const { setEmail_ } = useLogin();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
@@ -30,132 +30,32 @@ const Login = (props) => {
 
   const [users, setUsers] = useState([]);
 
-  useEffect(() => {
-    //Traigo los datos 3 segundos despues
-    GuardarData();
+  useEffect(() => {}, []);
 
-    setTimeout(() => {
-      TraerData();
-    }, 3000);
-  }, []);
-
-  const GuardarData = async () => {
-    // guardo la informacion en el asyn mientras se carga la aplicacion
+  const login = (values, actions = false) => {
     try {
-      console.log("guardando user");
-      await AsyncStorage.setItem(
-        "Usuarios",
-        JSON.stringify([
-          {
-            id: 1,
-            correo: "admin@admin.com",
-            clave: 1111,
-            perfil: "admin",
-            sexo: "femenino",
-          },
-          {
-            id: 2,
-            correo: "invitado@invitado.com",
-            clave: 2222,
-            perfil: "invitado",
-            sexo: "femenino",
-          },
-          {
-            id: 3,
-            correo: "usuario@usuario.com",
-            clave: 3333,
-            perfil: "usuario",
-            sexo: "masculino",
-          },
-          {
-            id: 4,
-            correo: "anonimo@anonimo.com",
-            clave: 4444,
-            perfil: "usuario",
-            sexo: "masculino",
-          },
-          {
-            id: 5,
-            correo: "tester@tester.com",
-            clave: 5555,
-            perfil: "tester",
-            sexo: "femenino",
-          },
-          {
-            id: 420,
-            correo: "invitado@gmail.com",
-            clave: "invitado1234",
-            perfil: "usuario",
-            sexo: "masculino",
-          },
-          {
-            id: 421,
-            correo: "invitado1@gmail.com",
-            clave: "invitado1234",
-            perfil: "usuario",
-            sexo: "masculino",
-          },
-          {
-            id: 422,
-            correo: "invitado2@gmail.com",
-            clave: "invitado1234",
-            perfil: "usuario",
-            sexo: "masculino",
-          },
-          {
-            id: 423,
-            correo: "invitado3@gmail.com",
-            clave: "invitado1234",
-            perfil: "usuario",
-            sexo: "masculino",
-          },
-        ])
-      );
-    } catch (e) {
-      console.log("error guardando en el storage" + e);
-    }
-  };
-  const TraerData = async () => {
-    try {
-      const value = await AsyncStorage.getItem("Usuarios");
-      if (value !== null) {
-        setUsers(value);
-        console.log("ya cargaron los usuarios!!!");
-      }
-    } catch (e) {
-      console.log("error TRAYENDO en el storage" + e);
-    }
-  };
-  const validarCredencial = (values) => {
-    let retorno = false;
-    if (users.length > 0) {
-      JSON.parse(users).forEach((element) => {
-        if (
-          element.correo == values.email &&
-          element.clave == values.password
-        ) {
-          retorno = true;
-        }
-      });
-    } else {
-      console.log("LOS USUARIOS ESTAN VACIOS!!!");
-    }
-
-    return retorno;
-  };
-  const onPressLogIn = (values) => {
-    //console.log(values)
-    if (validarCredencial(values)) {
       setLoading(true);
-      setTimeout(() => {
-        setEmail_(values.email);
-        setIsLogIn(true);
-      }, 2000);
-    } else {
-      setShowModal(true);
+      authentication
+        .signInWithEmailAndPassword(values.email, values.password)
+        .then((_userCredentials) => {
+          actions && actions.resetForm();
+          setLoading(false);
+          setIsLogIn(true);
+        })
+        .catch((error) => {
+          switch (error.code) {
+            case "auth/user-not-found":
+              Alert.alert("¡Ops!", "¡Usuario y/o Contraseña incorrectos!");
+              break;
+            case "auth/wrong-password":
+              Alert.alert("¡Ops!", "¡Usuario y/o Contraseña incorrectos!");
+              break;
+          }
+        });
+    } catch (error) {
+      setLoading(false);
+      alert(error);
     }
-    setEmail("");
-    setPassword("");
   };
   const btnLogin = (bgColor, color, txtName, action) => {
     return (
@@ -189,16 +89,7 @@ const Login = (props) => {
   };
   const btnInvited = (number, txtName) => {
     const onpressInvited = (numero) => {
-      setEmail_(`invitado${numero}@gmail.com`);
-      setEmail(`invitado${numero}@gmail.com`);
-      setPassword("invitado1234");
-      setLoading(true);
-      setTimeout(() => {
-        setIsLogIn(true);
-        setEmail("");
-        setPassword("");
-        setLoading(false);
-      }, 2000);
+      login({ email: `invitado${numero}@gmail.com`, password: "123456" });
     };
     return (
       <TouchableOpacity
@@ -247,7 +138,8 @@ const Login = (props) => {
         initialValues={{ email: email, password: "" }}
         validationSchema={LoginValidation}
         onSubmit={(values, actions) => {
-          onPressLogIn(values);
+          //onPressLogIn(values);
+          login(values, actions);
           actions.resetForm();
         }}
       >
@@ -257,6 +149,7 @@ const Login = (props) => {
               label="Correo Electrónico"
               labelStyle={{ color: ColorsPPS.azul }}
               style={{ width: "100%", padding: 10 }}
+              errorStyle={{ height: 0 }}
               inputContainerStyle={{ borderColor: ColorsPPS.azul }}
               leftIcon={
                 <Ionicons
@@ -289,6 +182,7 @@ const Login = (props) => {
                 color: ColorsPPS.azul,
                 borderColor: ColorsPPS.azul,
               }}
+              errorStyle={{ height: 0 }}
               style={{ width: "100%", padding: 10 }}
               leftIcon={
                 <Ionicons name="key" size={20} color={ColorsPPS.azul} />
@@ -338,9 +232,7 @@ const Login = (props) => {
       </Formik>
     );
   };
-  /*
-<LoadingScreen message={'Trayendo tus productos...'} />
-*/
+
   return loading ? (
     <LoadingScreen message={"Iniciando Sesión ... "} />
   ) : (
@@ -421,7 +313,13 @@ const styles = StyleSheet.create({
     color: "crimson",
     fontWeight: "bold",
     textAlign: "center",
-    fontSize: 15,
+    fontSize: Sizes_.small,
+  },
+  errorTextContainer: {
+    borderWidth: 0,
+    alignItems: "flex-start",
+    paddingHorizontal: 10,
+    marginBottom: 5,
   },
 });
 export default Login;

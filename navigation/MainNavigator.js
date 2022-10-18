@@ -1,17 +1,23 @@
 import * as React from "react";
-import { View, Text } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "../screens/Login";
 import Home from "../screens/Home";
 import Register from "../screens/Register";
 import Splash from "../screens/Splash";
 import { useLogin } from "../context/LoginProvider";
+import PruebaOrientation from "../screens/pruebaOrientation";
+import Pruebafab from "../screens/pruebafab";
+
 const Stack = createNativeStackNavigator();
 
 const Init = () => {
   return (
     <Stack.Navigator initialRouteName="Splash">
+      <Stack.Screen
+        component={Pruebafab}
+        options={{ headerShown: false }}
+        name="prueba"
+      />
       <Stack.Screen
         component={Splash}
         options={{ headerShown: false }}
